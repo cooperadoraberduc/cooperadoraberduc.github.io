@@ -267,7 +267,6 @@ input.er,select.er,textarea.er{border-color:#c0392b;}
 </div>
 
 <script>
-
 const WORKER_URL = 'https://berduc-mailer.cooperadoraberduc.workers.dev';
 
 const KEY = 'berduc_v1';
@@ -319,8 +318,7 @@ window.onload = () => {
   document.getElementById('f-num').value = padN(d.ultimo+1);
   document.getElementById('f-fecha').value = hoy();
   renderHist();
-  setBadge(RESEND_KEY!=='TU_RESEND_API_KEY'?'ok':'warn',
-           RESEND_KEY!=='TU_RESEND_API_KEY'?'Respaldo de mail activo':'Sin respaldo configurado');
+  setBadge('ok','Respaldo de mail activo');
 };
 
 function validar(){
