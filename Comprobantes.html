@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comprobantes — Cooperadora Parque Escolar Enrique Berduc</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;600;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --v:#1a4a2e;--vm:#2d6e47;--vc:#4a9463;
+  --d:#d4a017;--cr:#faf7f0;--gc:#f0ede6;
+  --g:#888;--t:#1c1c1c;--b:#c8c0a8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Source Sans 3',sans-serif;background:#e8e4d8;min-height:100vh;color:var(--t);}
+
+.header{background:var(--v);padding:14px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.header .ico{font-size:22px;}
+.header h1{font-family:'Playfair Display',serif;font-size:15px;color:white;line-height:1.3;}
+.header p{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;}
+.hbadge{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.hdot{width:7px;height:7px;border-radius:50%;}
+.hdot.ok{background:#27ae60;}
+.hdot.warn{background:#f39c12;}
+.hdot.spin{background:#2471a3;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hbadge span{color:rgba(255,255,255,.6);}
+
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);padding:11px 22px;border-radius:2px;font-size:13px;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:transform .3s;z-index:300;white-space:nowrap;pointer-events:none;}
+#toast.show{transform:translateX(-50%) translateY(0);}
+#toast.ok{background:var(--v);color:white;}
+#toast.err{background:#c0392b;color:white;}
+#toast.info{background:#2471a3;color:white;}
+
+.wrap{display:flex;flex-direction:column;align-items:center;padding:28px 16px 60px;background:var(--cr);min-height:calc(100vh - 56px);}
+
+.card{background:white;border:1px solid var(--b);border-radius:2px;width:100%;max-width:560px;padding:28px 32px;box-shadow:0 2px 16px rgba(0,0,0,.07);margin-bottom:24px;}
+.fsec{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--vc);margin-bottom:14px;padding-bottom:7px;border-bottom:1px solid var(--gc);}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px;}
+.frow.f1{grid-template-columns:1fr;}
+.fg{display:flex;flex-direction:column;gap:5px;}
+label{font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--v);text-transform:uppercase;}
+input,select,textarea{font-family:'Source Sans 3',sans-serif;font-size:13px;padding:8px 11px;border:1.5px solid var(--b);border-radius:2px;background:var(--cr);color:var(--t);transition:border-color .2s;outline:none;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--vm);background:white;}
+input[readonly]{background:var(--gc);font-family:'Courier Prime',monospace;font-weight:700;font-size:15px;color:var(--v);}
+textarea{resize:vertical;min-height:58px;}
+.fdiv{border:none;border-top:1px solid var(--gc);margin:20px 0;}
+.ferr{color:#c0392b;font-size:11px;margin-top:3px;display:none;}
+input.er,select.er,textarea.er{border-color:#c0392b;}
+
+.btnmain{width:100%;background:var(--v);color:white;border:none;padding:14px;font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s;margin-top:6px;}
+.btnmain:hover:not(:disabled){background:var(--vm);}
+.btnmain:disabled{background:#aaa;cursor:not-allowed;}
+
+.htit{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g);margin-bottom:10px;width:100%;max-width:560px;}
+.hi{background:white;border:1px solid var(--b);border-radius:2px;padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px;width:100%;max-width:560px;}
+.hinum{font-family:'Courier Prime',monospace;font-weight:700;color:var(--v);font-size:14px;flex-shrink:0;}
+.hiinfo{flex:1;}
+.hinom{font-weight:600;}
+.hidet{color:var(--g);font-size:11px;margin-top:1px;}
+.pill{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.pp{background:#fff3cd;color:#856404;}
+.pd{background:#d4edda;color:#155724;}
+.pn{background:#e2e3e5;color:#383d41;}
+.btnsm{background:none;border:1.5px solid var(--b);color:var(--g);font-size:10px;padding:4px 9px;cursor:pointer;border-radius:2px;font-weight:700;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+.btnsm:hover{border-color:var(--vc);color:var(--v);}
+.empty{color:var(--g);font-size:13px;text-align:center;padding:18px;border:1px dashed var(--b);border-radius:2px;width:100%;max-width:560px;}
+
+.mov{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:16px;}
+.mov.on{display:flex;}
+.mo{background:white;border-radius:2px;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,.25);}
+.moh{background:var(--v);color:white;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;}
+.moh h3{font-family:'Playfair Display',serif;font-size:16px;}
+.mox{background:none;border:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;line-height:1;}
+.mob{padding:20px;}
+.mob .fg{margin-bottom:12px;}
+.mob input,.mob select,.mob textarea{width:100%;}
+.mob textarea{min-height:65px;}
+.moacts{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
+.btncancel{background:none;border:1.5px solid var(--b);color:var(--g);padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;border-radius:2px;}
+.btnok{background:var(--v);color:white;border:none;padding:8px 22px;font-size:12px;font-weight:700;cursor:pointer;border-radius:2px;}
+.btnok:hover{background:var(--vm);}
+
+#comp-area{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:16px;}
+#comp-area.on{display:flex;}
+.cw{background:white;max-height:95vh;overflow-y:auto;width:100%;max-width:720px;border-radius:2px;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.cacts{background:var(--v);padding:10px 18px;display:flex;gap:8px;justify-content:flex-end;}
+.bca{background:white;color:var(--v);border:none;padding:7px 16px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:2px;}
+.bca:hover{background:var(--cr);}
+.bca.d{background:transparent;color:#ffccaa;border:1px solid #ffccaa;}
+.bca.d:hover{background:rgba(255,100,0,.1);}
+.comp{padding:36px 42px;background:white;}
+.chdr{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:16px;margin-bottom:22px;padding-bottom:16px;border-bottom:3px double var(--v);}
+.corg{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--v);line-height:1.3;}
+.csub{font-size:10px;color:var(--g);line-height:1.5;margin-top:5px;}
+.cico{width:50px;height:50px;background:var(--v);border-radius:50%;margin:0 auto 5px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.ctipo{font-family:'Playfair Display',serif;font-size:10px;font-weight:700;color:var(--v);letter-spacing:2px;text-transform:uppercase;text-align:center;}
+.cnarea{text-align:right;}
+.cnlbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--g);font-weight:700;}
+.cnval{font-family:'Courier Prime',monospace;font-size:24px;font-weight:700;color:var(--v);line-height:1;margin:2px 0;}
+.cflbl{font-size:9px;color:var(--g);margin-top:7px;}
+.cfval{font-size:12px;font-weight:600;color:var(--t);}
+.cfr{display:grid;grid-template-columns:130px 1fr;gap:4px 10px;align-items:baseline;padding:6px 0;border-bottom:1px solid #f0ede6;}
+.cfr:last-child{border-bottom:none;}
+.cfl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--vc);}
+.cfv{font-size:13px;font-weight:600;color:var(--t);}
+.cmonto{background:var(--v);color:white;padding:14px 18px;margin:16px 0;display:flex;justify-content:space-between;align-items:center;border-radius:2px;}
+.cmlbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;opacity:.8;}
+.cmval{font-family:'Courier Prime',monospace;font-size:26px;font-weight:700;}
+.cmlet{font-size:10px;opacity:.75;font-style:italic;margin-top:2px;}
+.cconc{background:var(--gc);padding:11px 14px;border-left:3px solid var(--vc);margin-bottom:16px;}
+.cclbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g);margin-bottom:3px;}
+.cctxt{font-size:12px;color:var(--t);line-height:1.5;}
+.caviso{margin-top:16px;padding:11px 13px;background:#fff8e6;border:1px solid #e8d080;border-radius:2px;font-size:9.5px;color:#6b5a00;line-height:1.65;text-align:justify;}
+.cbanco{margin-top:12px;padding:9px 13px;border:1px solid var(--b);border-radius:2px;font-size:10px;color:var(--t);line-height:1.8;background:var(--cr);}
+.cblbl{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--vc);margin-bottom:3px;}
+.cfirma{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:20px;padding-top:16px;border-top:1px solid var(--b);}
+.fb{text-align:center;}
+.fl{border-bottom:1.5px solid var(--t);height:44px;margin-bottom:5px;}
+.flbl{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--g);}
+.cfoot{margin-top:16px;padding-top:8px;border-top:1px solid var(--gc);display:flex;justify-content:space-between;font-size:8px;color:var(--g);}
+.sep{border:none;border-top:1.5px dashed #ccc;margin:24px 0 20px;position:relative;}
+.sep::after{content:"✂  COPIE AQUÍ — ENTREGAR COPIA AL PAGADOR";position:absolute;left:50%;top:-8px;transform:translateX(-50%);background:white;padding:0 10px;font-size:7px;letter-spacing:1.5px;color:#bbb;white-space:nowrap;}
+.tagc{font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--g);margin-bottom:4px;}
+
+@media print{
+  body *{visibility:hidden;}
+  #comp-imprimible,#comp-imprimible *{visibility:visible;}
+  #comp-imprimible{position:absolute;top:0;left:0;width:100%;}
+  .cacts{display:none!important;}
+  .cw{box-shadow:none;max-height:none;overflow:visible;}
+  .comp{padding:22px 30px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="ico">🌿</span>
+  <div>
+    <h1>Cooperadora del Parque Escolar Enrique Berduc</h1>
+    <p>Sistema de Comprobantes de Pago · Paraná, Entre Ríos</p>
+  </div>
+  <div class="hbadge">
+    <div class="hdot" id="hdot"></div>
+    <span id="htxt">Iniciando...</span>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="fsec">Datos del comprobante</div>
+    <div class="frow">
+      <div class="fg"><label>N° Comprobante</label><input id="f-num" type="text" readonly></div>
+      <div class="fg"><label>Fecha</label><input id="f-fecha" type="date"></div>
+    </div>
+
+    <hr class="fdiv">
+    <div class="fsec">Datos del pagador</div>
+    <div class="frow f1">
+      <div class="fg">
+        <label>Apellido y Nombre / Razón Social *</label>
+        <input id="f-nom" type="text" placeholder="Ej: García, Juan Carlos">
+        <span class="ferr" id="e-nom">Campo obligatorio</span>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>DNI / CUIT</label><input id="f-dni" type="text" placeholder="Ej: 25.123.456"></div>
+      <div class="fg"><label>Condición</label>
+        <select id="f-cond">
+          <option value="Socio">Socio de la Cooperadora</option>
+          <option value="Canon">Uso de espacio (canon)</option>
+          <option value="Cuota">Cuota asociativa</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="fdiv">
+    <div class="fsec">Concepto y monto</div>
+    <div class="frow f1">
+      <div class="fg">
+        <label>Concepto / Descripción *</label>
+        <textarea id="f-conc" placeholder="Ej: Canon mensual por uso de espacio deportivo — Marzo 2025"></textarea>
+        <span class="ferr" id="e-conc">Campo obligatorio</span>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Período</label><input id="f-per" type="text" placeholder="Ej: Marzo 2025"></div>
+      <div class="fg"><label>Forma de pago</label>
+        <select id="f-fp">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Transferencia bancaria">Transferencia bancaria</option>
+          <option value="Billetera virtual">Billetera virtual</option>
+          <option value="Cheque">Cheque</option>
+          <option value="Depósito bancario">Depósito bancario</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow f1">
+      <div class="fg">
+        <label>Importe abonado (ARS) *</label>
+        <input id="f-monto" type="number" placeholder="0.00" step="0.01" min="0">
+        <span class="ferr" id="e-monto">Ingrese un monto válido</span>
+      </div>
+    </div>
+
+    <hr class="fdiv">
+    <div class="fsec">Receptor del pago</div>
+    <div class="frow f1">
+      <div class="fg">
+        <label>Nombre completo de quien recibe *</label>
+        <input id="f-rec" type="text" placeholder="Nombre y apellido del responsable">
+        <span class="ferr" id="e-rec">Campo obligatorio</span>
+      </div>
+    </div>
+    <div class="frow f1">
+      <div class="fg">
+        <label>Cargo / Función</label>
+        <input id="f-cargo" type="text" placeholder="Ej: Tesorero/a — Presidente/a — Secretario/a">
+      </div>
+    </div>
+
+    <hr class="fdiv">
+    <button class="btnmain" id="btn-emit" onclick="emitir()">✦ Emitir comprobante</button>
+  </div>
+
+  <div class="htit">Últimos comprobantes emitidos en este dispositivo</div>
+  <div id="hist" style="width:100%;max-width:560px;"></div>
+</div>
+
+<!-- MODAL DEPÓSITO -->
+<div class="mov" id="m-dep">
+  <div class="mo">
+    <div class="moh"><h3>Registrar depósito</h3><button class="mox" onclick="cerrarM()">✕</button></div>
+    <div class="mob">
+      <input type="hidden" id="d-num">
+      <div class="fg"><label>Estado</label>
+        <select id="d-est">
+          <option value="Depositado">Depositado ✓</option>
+          <option value="Pendiente">Pendiente</option>
+          <option value="No aplica">No aplica</option>
+        </select>
+      </div>
+      <div class="fg"><label>Fecha de depósito</label><input id="d-fecha" type="date"></div>
+      <div class="fg"><label>N° Operación bancaria</label><input id="d-nro" type="text" placeholder="Ej: 00123456"></div>
+      <div class="fg"><label>Observaciones</label><textarea id="d-obs" placeholder="Notas adicionales..."></textarea></div>
+      <div class="moacts">
+        <button class="btncancel" onclick="cerrarM()">Cancelar</button>
+        <button class="btnok" onclick="guardarDeposito()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPROBANTE -->
+<div id="comp-area">
+  <div class="cw" id="comp-imprimible">
+    <div class="cacts">
+      <button class="bca" onclick="window.print()">🖨 Imprimir</button>
+      <button class="bca d" onclick="document.getElementById('comp-area').classList.remove('on')">✕ Cerrar</button>
+    </div>
+    <div class="comp" id="comp-html"></div>
+  </div>
+</div>
+
+<script>
+
+const RESEND_KEY   = 're_BTChY6Dc_3g8RTWTNSR9Vfqh4oCnsQ2m2';
+const RESEND_TO    = 'cooperadoraberduc@outlook.com'; // mail destino del respaldo
+const RESEND_FROM  = 'onboarding@resend.dev';         // remitente (gratis sin dominio)
+
+const KEY = 'berduc_v1';
+
+const fmt  = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',minimumFractionDigits:2}).format(n);
+const padN = n => String(n).padStart(5,'0');
+const hoy  = () => new Date().toISOString().split('T')[0];
+const fmtF = iso => {
+  if(!iso) return '';
+  const [y,m,d] = String(iso).split('T')[0].split('-');
+  const M = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  return `${parseInt(d)} de ${M[parseInt(m)-1]} de ${y}`;
+};
+
+function enLetras(n){
+  const num=Math.floor(n), dec=Math.round((n-num)*100);
+  const u=['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve'];
+  const d2=['','','veinte','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
+  const c=['','cien','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'];
+  function cv(x){
+    if(x===0)return'cero'; if(x<20)return u[x];
+    if(x<100)return d2[Math.floor(x/10)]+(x%10?' y '+u[x%10]:'');
+    if(x===100)return'cien';
+    if(x<1000)return c[Math.floor(x/100)]+(x%100?' '+cv(x%100):'');
+    if(x<2000)return'mil'+(x%1000?' '+cv(x%1000):'');
+    if(x<1000000)return cv(Math.floor(x/1000))+' mil'+(x%1000?' '+cv(x%1000):'');
+    return cv(Math.floor(x/1000000))+' millones'+(x%1000000?' '+cv(x%1000000):'');
+  }
+  let r=cv(num); r=r[0].toUpperCase()+r.slice(1);
+  return r+(dec>0?` con ${dec}/100`:' con 00/100');
+}
+
+const getD = () => { try{return JSON.parse(localStorage.getItem(KEY)||'{"ultimo":0,"reg":[]}')}catch{return{ultimo:0,reg:[]}} };
+const setD = d => localStorage.setItem(KEY, JSON.stringify(d));
+
+function toast(msg, tipo='ok', ms=3500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`show ${tipo}`;
+  setTimeout(()=>t.className=tipo, ms);
+}
+
+function setBadge(estado, txt){
+  const dot=document.getElementById('hdot'), s=document.getElementById('htxt');
+  dot.className='hdot '+(estado||''); s.textContent=txt;
+}
+
+window.onload = () => {
+  const d=getD();
+  document.getElementById('f-num').value = padN(d.ultimo+1);
+  document.getElementById('f-fecha').value = hoy();
+  renderHist();
+  setBadge(RESEND_KEY!=='TU_RESEND_API_KEY'?'ok':'warn',
+           RESEND_KEY!=='TU_RESEND_API_KEY'?'Respaldo de mail activo':'Sin respaldo configurado');
+};
+
+function validar(){
+  const campos=[
+    {id:'f-nom',  eid:'e-nom'},
+    {id:'f-conc', eid:'e-conc'},
+    {id:'f-monto',eid:'e-monto'},
+    {id:'f-rec',  eid:'e-rec'},
+  ];
+  let ok=true;
+  campos.forEach(({id,eid})=>{
+    const el=document.getElementById(id), er=document.getElementById(eid);
+    const val=el.value.trim();
+    const v=id==='f-monto'?(val!==''&&parseFloat(val)>0):val!=='';
+    el.classList.toggle('er',!v); er.style.display=v?'none':'block';
+    if(!v) ok=false;
+  });
+  return ok;
+}
+
+async function emitir(){
+  if(!validar()) return;
+  const btn=document.getElementById('btn-emit');
+  btn.disabled=true; btn.textContent='Emitiendo...';
+
+  const d=getD();
+  const num=d.ultimo+1;
+  const fp=document.getElementById('f-fp').value;
+
+  const reg={
+    numero:   num,
+    fecha:    document.getElementById('f-fecha').value,
+    nombre:   document.getElementById('f-nom').value.trim(),
+    dni:      document.getElementById('f-dni').value.trim(),
+    condicion:document.getElementById('f-cond').value,
+    concepto: document.getElementById('f-conc').value.trim(),
+    periodo:  document.getElementById('f-per').value.trim(),
+    formapago:fp,
+    monto:    parseFloat(document.getElementById('f-monto').value),
+    receptor: document.getElementById('f-rec').value.trim(),
+    cargo:    document.getElementById('f-cargo').value.trim(),
+    emitido:  new Date().toISOString(),
+    estado:   (fp==='Efectivo'||fp==='Cheque')?'Pendiente':'No aplica',
+    deposito:'', nroOp:'', obs:'',
+  };
+
+  d.ultimo=num; d.reg.unshift(reg); setD(d);
+  mostrarComp(reg);
+  renderHist();
+  limpiar();
+  document.getElementById('f-num').value=padN(num+1);
+
+  // Enviar respaldo por mail
+  await enviarMail(reg);
+
+  btn.disabled=false; btn.textContent='✦ Emitir comprobante';
+}
+
+async function enviarMail(r){
+  if(RESEND_KEY==='TU_RESEND_API_KEY'){
+    toast('Comprobante emitido (sin respaldo de mail — configurar Resend)', 'info');
+    return;
+  }
+  setBadge('spin','Enviando respaldo...');
+  try {
+    const cuerpo = `
+COOPERADORA DEL PARQUE ESCOLAR ENRIQUE BERDUC
+Comprobante de Pago N° ${padN(r.numero)}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Fecha:         ${fmtF(r.fecha)}
+Emitido:       ${new Date(r.emitido).toLocaleString('es-AR')}
+
+PAGADOR
+Nombre:        ${r.nombre}
+DNI / CUIT:    ${r.dni||'—'}
+Condición:     ${r.condicion}
+
+PAGO
+Concepto:      ${r.concepto}
+Período:       ${r.periodo||'—'}
+Forma de pago: ${r.formapago}
+Monto:         ${fmt(r.monto)}
+En letras:     ${enLetras(r.monto)} pesos
+
+RECEPTOR
+Nombre:        ${r.receptor}
+Cargo:         ${r.cargo||'—'}
+
+Estado depósito: ${r.estado}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Este mail es el respaldo automático del sistema de comprobantes.
+CBU: 3860001003000057580769 | Alias: parqueberduc2
+CUIT: 30-06905303-48 | Condición IVA: Exento
+    `.trim();
+
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: RESEND_FROM,
+        to:   [RESEND_TO],
+        subject: `[Berduc] Comprobante #${padN(r.numero)} — ${r.nombre} — ${fmt(r.monto)}`,
+        text: cuerpo,
+      }),
+    });
+
+    if(res.ok){
+      setBadge('ok','Respaldo de mail activo');
+      toast(`✓ Comprobante #${padN(r.numero)} emitido y respaldo enviado`);
+    } else {
+      throw new Error('Error Resend: '+res.status);
+    }
+  } catch(e){
+    setBadge('warn','Respaldo no enviado');
+    toast('Comprobante emitido, pero el mail de respaldo falló', 'err');
+  }
+}
+
+function limpiar(){
+  ['f-nom','f-dni','f-conc','f-per','f-monto','f-rec','f-cargo'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.value=''; el.classList.remove('er');
+  });
+  document.getElementById('f-fecha').value=hoy();
+  ['e-nom','e-conc','e-monto','e-rec'].forEach(id=>document.getElementById(id).style.display='none');
+}
+
+function renderHist(){
+  const d=getD(), c=document.getElementById('hist');
+  if(!d.reg.length){ c.innerHTML='<div class="empty">Aún no se emitieron comprobantes en este dispositivo.</div>'; return; }
+  c.innerHTML=d.reg.slice(0,15).map(r=>`
+    <div class="hi">
+      <span class="hinum">#${padN(r.numero)}</span>
+      <div class="hiinfo">
+        <div class="hinom">${r.nombre}</div>
+        <div class="hidet">${fmtF(r.fecha)} · ${fmt(r.monto)} · ${r.formapago}</div>
+      </div>
+      ${pillE(r.estado)}
+      <button class="btnsm" onclick="verComp(${r.numero})">Ver</button>
+      ${r.estado==='Pendiente'?`<button class="btnsm" style="border-color:#856404;color:#856404" onclick="abrirDep(${r.numero})">Depositar</button>`:''}
+    </div>`).join('');
+}
+
+function pillE(e){
+  if(e==='Depositado') return '<span class="pill pd">Depositado</span>';
+  if(e==='Pendiente')  return '<span class="pill pp">Pendiente</span>';
+  return '<span class="pill pn">N/A</span>';
+}
+
+function verComp(num){
+  const r=getD().reg.find(x=>x.numero===num);
+  if(r) mostrarComp(r);
+}
+
+// ── MODAL DEPÓSITO ──
+function abrirDep(num){
+  document.getElementById('d-num').value=num;
+  document.getElementById('d-fecha').value=hoy();
+  document.getElementById('d-nro').value='';
+  document.getElementById('d-obs').value='';
+  document.getElementById('m-dep').classList.add('on');
+}
+function cerrarM(){ document.getElementById('m-dep').classList.remove('on'); }
+
+function guardarDeposito(){
+  const num=parseInt(document.getElementById('d-num').value);
+  const d=getD();
+  const idx=d.reg.findIndex(x=>x.numero===num);
+  if(idx>=0){
+    d.reg[idx].estado   = document.getElementById('d-est').value;
+    d.reg[idx].deposito = document.getElementById('d-fecha').value;
+    d.reg[idx].nroOp    = document.getElementById('d-nro').value;
+    d.reg[idx].obs      = document.getElementById('d-obs').value;
+    setD(d);
+    renderHist();
+    cerrarM();
+    toast('✓ Depósito registrado');
+  }
+}
+
+// ── COMPROBANTE ──
+function mostrarComp(r){
+  const n=padN(r.numero), mf=fmt(r.monto), ml=enLetras(r.monto);
+  document.getElementById('comp-html').innerHTML=bloque(r,n,mf,ml,false)+'<hr class="sep">'+bloque(r,n,mf,ml,true);
+  document.getElementById('comp-area').classList.add('on');
+}
+
+function bloque(r,n,mf,ml,dup){
+  return `
+  <div style="opacity:${dup?.92:1}">
+    <div class="tagc">${dup?'Duplicado — Para el pagador':'Original — Cooperadora del Parque Escolar Enrique Berduc'}</div>
+    <div class="chdr">
+      <div>
+        <div class="corg">Cooperadora del<br>Parque Escolar<br>Enrique Berduc</div>
+        <div class="csub">CUIT: 30-06905303-48 · Exento<br>CBU: 3860001003000057580769<br>Paraná, Entre Ríos</div>
+      </div>
+      <div>
+        <div class="cico">🌿</div>
+        <div class="ctipo">Recibo<br>de Pago</div>
+      </div>
+      <div class="cnarea">
+        <div class="cnlbl">N° Comprobante</div>
+        <div class="cnval">${n}</div>
+        <div class="cflbl" style="margin-top:7px">Fecha de emisión</div>
+        <div class="cfval">${fmtF(r.fecha)}</div>
+        ${dup?'<div style="margin-top:7px;background:#eee;border-radius:2px;padding:3px 8px;font-size:8px;letter-spacing:1.5px;color:#888;font-weight:700">DUPLICADO</div>':''}
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div class="cfr"><span class="cfl">Nombre</span><span class="cfv">${r.nombre}</span></div>
+      ${r.dni?`<div class="cfr"><span class="cfl">DNI / CUIT</span><span class="cfv">${r.dni}</span></div>`:''}
+      <div class="cfr"><span class="cfl">Condición</span><span class="cfv">${r.condicion}</span></div>
+      ${r.periodo?`<div class="cfr"><span class="cfl">Período</span><span class="cfv">${r.periodo}</span></div>`:''}
+      <div class="cfr"><span class="cfl">Forma de pago</span><span class="cfv">${r.formapago}</span></div>
+    </div>
+
+    <div class="cconc">
+      <div class="cclbl">Concepto</div>
+      <div class="cctxt">${r.concepto}</div>
+    </div>
+
+    <div class="cmonto">
+      <div>
+        <div class="cmlbl">Importe total abonado</div>
+        <div class="cmlet">${ml} pesos</div>
+      </div>
+      <div class="cmval">${mf}</div>
+    </div>
+
+    <div class="caviso">
+      <strong>⚠ Importante:</strong> En caso de abonarse en la Dirección del Parque, el monto percibido
+      <strong>deberá ser depositado en la cuenta bancaria de la Cooperadora dentro de las 24 (veinticuatro)
+      horas hábiles</strong> siguientes a su recepción, conforme lo establecido por la
+      <strong>Ley de Contabilidad de la Provincia de Entre Ríos</strong> y la normativa vigente
+      para la administración de fondos de Cooperadoras Escolares.
+    </div>
+
+    <div class="cbanco">
+      <div class="cblbl">Datos bancarios para depósito / transferencia</div>
+      <strong>Cooperadora del Parque Escolar Enrique Berduc</strong><br>
+      CBU: <strong>3860001003000057580769</strong> &nbsp;|&nbsp; CUIT: 30-06905303-48 &nbsp;|&nbsp; Exento<br>
+      <span style="font-size:9px;color:var(--vc);font-weight:700;text-transform:uppercase;letter-spacing:1px">Billeteras virtuales</span>
+      &nbsp;Alias: <strong>parqueberduc2</strong>
+    </div>
+
+    <div class="cfirma">
+      <div class="fb">
+        <div class="fl"></div>
+        <div class="flbl">Firma del receptor</div>
+        <div style="font-size:12px;font-weight:600;margin-top:5px">${r.receptor}</div>
+        <div style="font-size:10px;color:var(--g);margin-top:1px">${r.cargo||'&nbsp;'}</div>
+      </div>
+      <div class="fb">
+        <div class="fl"></div>
+        <div class="flbl">Aclaración de firma</div>
+        <div style="font-size:12px;font-weight:600;margin-top:5px">${r.receptor}</div>
+        <div style="font-size:10px;color:var(--g);margin-top:1px">DNI del receptor</div>
+      </div>
+    </div>
+
+    <div class="cfoot">
+      <span>Parque Escolar Enrique Berduc · Paraná, Entre Ríos</span>
+      <span>Emitido: ${new Date(r.emitido).toLocaleString('es-AR')}</span>
+    </div>
+  </div>`;
+}
+</script>
+</body>
+</html>
