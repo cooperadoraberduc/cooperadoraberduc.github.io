@@ -268,9 +268,7 @@ input.er,select.er,textarea.er{border-color:#c0392b;}
 
 <script>
 
-const RESEND_KEY   = 're_BTChY6Dc_3g8RTWTNSR9Vfqh4oCnsQ2m2';
-const RESEND_TO    = 'cooperadoraberduc@outlook.com'; // mail destino del respaldo
-const RESEND_FROM  = 'onboarding@resend.dev';         // remitente (gratis sin dominio)
+const WORKER_URL = 'https://berduc-mailer.cooperadoraberduc.workers.dev';
 
 const KEY = 'berduc_v1';
 
@@ -382,10 +380,6 @@ async function emitir(){
 }
 
 async function enviarMail(r){
-  if(RESEND_KEY==='TU_RESEND_API_KEY'){
-    toast('Comprobante emitido (sin respaldo de mail — configurar Resend)', 'info');
-    return;
-  }
   setBadge('spin','Enviando respaldo...');
   try {
     const cuerpo = `
@@ -415,22 +409,16 @@ Cargo:         ${r.cargo||'—'}
 Estado depósito: ${r.estado}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Este mail es el respaldo automático del sistema de comprobantes.
 CBU: 3860001003000057580769 | Alias: parqueberduc2
 CUIT: 30-06905303-48 | Condición IVA: Exento
     `.trim();
 
-    const res = await fetch('https://api.resend.com/emails', {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: RESEND_FROM,
-        to:   [RESEND_TO],
         subject: `[Berduc] Comprobante #${padN(r.numero)} — ${r.nombre} — ${fmt(r.monto)}`,
-        text: cuerpo,
+        body: cuerpo,
       }),
     });
 
@@ -438,7 +426,7 @@ CUIT: 30-06905303-48 | Condición IVA: Exento
       setBadge('ok','Respaldo de mail activo');
       toast(`✓ Comprobante #${padN(r.numero)} emitido y respaldo enviado`);
     } else {
-      throw new Error('Error Resend: '+res.status);
+      throw new Error('Error '+res.status);
     }
   } catch(e){
     setBadge('warn','Respaldo no enviado');
